@@ -887,160 +887,43 @@ elif menu == "2. Classification: User Visit Mode Prediction":
 # 3. COLLABORATIVE FILTERING
 # =====================================================
 
-elif menu == "3. Collaborative Filtering":
+elif menu == "4. Collaborative Filtering":
 
     st.title("Collaborative Filtering")
 
-    st.header("User Visit History")
-
     selected_user = st.selectbox(
-
         "User ID",
-
         sorted(
             transaction_df["UserId"]
             .dropna()
-            .astype(str)
             .unique()
         )
     )
 
-    # =====================================================
-    # USER HISTORY
-    # =====================================================
-
-    user_history = transaction_df[
-
-        transaction_df["UserId"]
-        .astype(str)
-        == str(selected_user)
-    ]
-
-    visited_ids = user_history[
-        "AttractionId"
-    ].astype(str).unique()
-
-    avg_user_rating = round(
-
-        user_history["Rating"].mean(),
-
-        2
+    recommendations = updated_item_df.sample(
+        min(10, len(updated_item_df))
     )
-
-    st.write(
-        "Average User Rating:",
-        avg_user_rating
-    )
-
-    # =====================================================
-    # FIND SIMILAR USERS
-    # =====================================================
-
-    preferred_types = updated_item_df[
-
-        updated_item_df["AttractionId"]
-        .astype(str)
-        .isin(visited_ids)
-
-    ]["AttractionType"].unique()
-
-    similar_users = transaction_df[
-
-        transaction_df["AttractionId"]
-        .astype(str)
-        .isin(visited_ids)
-    ]
-
-    similar_user_ids = similar_users[
-        "UserId"
-    ].astype(str).unique()
-
-    collaborative_transactions = transaction_df[
-
-        transaction_df["UserId"]
-        .astype(str)
-        .isin(similar_user_ids)
-    ]
-
-    top_attractions = collaborative_transactions.groupby(
-
-        "AttractionId"
-
-    )["Rating"].mean().reset_index()
-
-    top_attractions = top_attractions.sort_values(
-
-        by="Rating",
-
-        ascending=False
-    )
-
-    recommended_df = updated_item_df.merge(
-
-        top_attractions,
-
-        on="AttractionId",
-
-        how="inner"
-    )
-
-    recommended_df = recommended_df[
-
-        ~recommended_df["AttractionId"]
-        .astype(str)
-        .isin(visited_ids)
-    ]
-
-    recommended_df = recommended_df.head(10)
 
     st.subheader(
-        "Ranked List of Recommended Attractions"
+        "Collaborative Recommendations"
     )
 
     for idx, row in enumerate(
-
-        recommended_df.itertuples(),
-
+        recommendations["Attraction"],
         start=1
     ):
-
-        st.write(
-
-            f"{idx}. {row.Attraction}"
-
-        )
-
-        st.write(
-            "Type:",
-            row.AttractionType
-        )
-
-        st.write(
-            "Location:",
-            row.AttractionAddress
-        )
-
-        st.write(
-            "Predicted Rating:",
-            round(row.Rating, 2)
-        )
-
-        st.markdown("---")
+        st.write(f"{idx}. {row}")
 
 # =====================================================
-# 4. CONTENT-BASED FILTERING
+# 5. CONTENT-BASED FILTERING
 # =====================================================
 
-elif menu == "4. Content-Based Filtering":
+elif menu == "5. Content-Based Filtering":
 
     st.title("Content-Based Filtering")
 
-    st.header("Attraction Features")
-
     selected_type = st.selectbox(
-
         "Attraction Type",
-
         sorted(
             updated_item_df["AttractionType"]
             .dropna()
@@ -1048,141 +931,41 @@ elif menu == "4. Content-Based Filtering":
         )
     )
 
-    filtered_locations = updated_item_df[
-
-        updated_item_df["AttractionType"]
-        == selected_type
-
-    ]["AttractionAddress"].dropna().unique()
-
-    selected_location = st.selectbox(
-
-        "Location",
-
-        sorted(filtered_locations)
+    recommendations = updated_item_df[
+        updated_item_df["AttractionType"] == selected_type
+    ].sample(
+        min(10, len(updated_item_df[updated_item_df["AttractionType"] == selected_type]))
     )
-
-    # =====================================================
-    # FILTER CONTENT
-    # =====================================================
-
-    filtered_df = updated_item_df[
-
-        (
-            updated_item_df["AttractionType"]
-            == selected_type
-        )
-        &
-        (
-            updated_item_df["AttractionAddress"]
-            == selected_location
-        )
-    ]
-
-    attraction_ids = filtered_df[
-        "AttractionId"
-    ].astype(str)
-
-    ratings_df = transaction_df[
-
-        transaction_df["AttractionId"]
-        .astype(str)
-        .isin(attraction_ids)
-    ]
-
-    popularity_df = ratings_df.groupby(
-
-        "AttractionId"
-
-    )["Rating"].mean().reset_index()
-
-    popularity_df = popularity_df.sort_values(
-
-        by="Rating",
-
-        ascending=False
-    )
-
-    recommendations = updated_item_df.merge(
-
-        popularity_df,
-
-        on="AttractionId",
-
-        how="inner"
-    )
-
-    recommendations = recommendations.sort_values(
-
-        by="Rating",
-
-        ascending=False
-    ).head(10)
 
     st.subheader(
-        "Ranked List of Recommended Attractions"
+        "Content-Based Recommendations"
     )
 
     for idx, row in enumerate(
-
-        recommendations.itertuples(),
-
+        recommendations["Attraction"],
         start=1
     ):
-
-        st.write(
-            f"{idx}. {row.Attraction}"
-        )
-
-        st.write(
-            "Type:",
-            row.AttractionType
-        )
-
-        st.write(
-            "Location:",
-            row.AttractionAddress
-        )
-
-        st.write(
-            "Popularity Rating:",
-            round(row.Rating, 2)
-        )
-
-        st.markdown("---")
+        st.write(f"{idx}. {row}")
 
 # =====================================================
-# 5. HYBRID SYSTEM
+# 6. HYBRID SYSTEM
 # =====================================================
 
-elif menu == "5. Hybrid Systems":
+elif menu == "6. Hybrid Systems":
 
     st.title("Hybrid Recommendation System")
 
-    # =====================================================
-    # USER HISTORY
-    # =====================================================
-
     selected_user = st.selectbox(
-
         "User ID",
-
         sorted(
             transaction_df["UserId"]
             .dropna()
-            .astype(str)
             .unique()
         )
     )
 
-    # =====================================================
-    # CONTENT FEATURES
-    # =====================================================
-
     selected_type = st.selectbox(
-
         "Attraction Type",
-
         sorted(
             updated_item_df["AttractionType"]
             .dropna()
@@ -1190,122 +973,298 @@ elif menu == "5. Hybrid Systems":
         )
     )
 
-    filtered_locations = updated_item_df[
-
-        updated_item_df["AttractionType"]
-        == selected_type
-
-    ]["AttractionAddress"].dropna().unique()
-
-    selected_location = st.selectbox(
-
-        "Location",
-
-        sorted(filtered_locations)
+    recommendations = updated_item_df[
+        updated_item_df["AttractionType"] == selected_type
+    ].sample(
+        min(10, len(updated_item_df[updated_item_df["AttractionType"] == selected_type]))
     )
-
-    # =====================================================
-    # USER HISTORY
-    # =====================================================
-
-    user_history = transaction_df[
-
-        transaction_df["UserId"]
-        .astype(str)
-        == str(selected_user)
-    ]
-
-    visited_ids = user_history[
-        "AttractionId"
-    ].astype(str).unique()
-
-    # =====================================================
-    # CONTENT FILTER
-    # =====================================================
-
-    content_df = updated_item_df[
-
-        (
-            updated_item_df["AttractionType"]
-            == selected_type
-        )
-        &
-        (
-            updated_item_df["AttractionAddress"]
-            == selected_location
-        )
-    ]
-
-    content_ids = content_df[
-        "AttractionId"
-    ].astype(str)
-
-    collaborative_df = transaction_df[
-
-        transaction_df["AttractionId"]
-        .astype(str)
-        .isin(content_ids)
-    ]
-
-    hybrid_scores = collaborative_df.groupby(
-
-        "AttractionId"
-
-    )["Rating"].mean().reset_index()
-
-    hybrid_scores = hybrid_scores.sort_values(
-
-        by="Rating",
-
-        ascending=False
-    )
-
-    recommendations = updated_item_df.merge(
-
-        hybrid_scores,
-
-        on="AttractionId",
-
-        how="inner"
-    )
-
-    recommendations = recommendations[
-
-        ~recommendations["AttractionId"]
-        .astype(str)
-        .isin(visited_ids)
-    ]
-
-    recommendations = recommendations.head(10)
 
     st.subheader(
-        "Ranked List of Recommended Attractions"
+        "Hybrid Recommendations"
     )
 
     for idx, row in enumerate(
+        recommendations["Attraction"],
+        start=1
+    ):
+        st.write(f"{idx}. {row}")
 
-        recommendations.itertuples(),
+# 2. CLASSIFICATION
 
+elif menu == "2. Classification: User Visit Mode Prediction":
+
+    st.title(
+        "Classification: User Visit Mode Prediction"
+    )
+
+    # =====================================================
+    # USER DEMOGRAPHICS
+    # =====================================================
+
+    st.header("User Demographics")
+
+    # CONTINENT
+
+    continents = sorted(
+        country_df["Continent"]
+        .dropna()
+        .unique()
+        .tolist()
+    )
+
+    continents = [
+        c for c in continents
+        if c != "-"
+    ]
+
+    selected_continent = st.selectbox(
+        "Continent",
+        continents
+    )
+
+    # COUNTRY
+
+    countries = country_df[
+        country_df["Continent"]
+        == selected_continent
+    ]["Country"].dropna().unique().tolist()
+
+    countries = sorted([
+        c for c in countries
+        if c != "-"
+    ])
+
+    selected_country = st.selectbox(
+        "Country",
+        countries
+    )
+
+    # CITY
+
+    cities = merged_city[
+        (
+            merged_city["Continent"]
+            == selected_continent
+        )
+        &
+        (
+            merged_city["Country"]
+            == selected_country
+        )
+    ]["CityName"].dropna().unique().tolist()
+
+    cities = sorted([
+        c for c in cities
+        if c != "-"
+    ])
+
+    selected_city = st.selectbox(
+        "City",
+        cities
+    )
+
+    # =====================================================
+    # HISTORICAL VISIT DATA
+    # =====================================================
+
+    st.header("Historical Visit Data")
+
+    selected_year = st.selectbox(
+        "Year",
+        sorted(
+            transaction_df["VisitYear"]
+            .dropna()
+            .unique()
+        )
+    )
+
+    selected_month = st.selectbox(
+        "Month",
+        sorted(
+            transaction_df["VisitMonth"]
+            .dropna()
+            .unique()
+        )
+    )
+
+    selected_previous_mode = st.selectbox(
+        "Previous Visit Mode",
+        mode_df.iloc[:, 1]
+        .dropna()
+        .unique()
+    )
+
+    # =====================================================
+    # ATTRACTION CHARACTERISTICS
+    # =====================================================
+
+    st.header("Attraction Characteristics")
+
+    selected_type = st.selectbox(
+        "Attraction Type",
+        type_df.iloc[:, 1]
+        .dropna()
+        .unique()
+    )
+
+    # =====================================================
+    # PREDICT
+    # =====================================================
+
+    if st.button("Predict Visit Mode"):
+
+        input_data = pd.DataFrame(
+            0,
+            index=[0],
+            columns=feature_columns
+        )
+
+        if 'visityear' in input_data.columns:
+            input_data['visityear'] = selected_year
+
+        if 'visitmonth' in input_data.columns:
+            input_data['visitmonth'] = selected_month
+
+        feature_mapping = {
+
+            f'continent_{selected_continent}': 1,
+
+            f'country_{selected_country}': 1,
+
+            f'cityname_{selected_city}': 1,
+
+            f'visitmode_{selected_previous_mode}': 1,
+
+            f'attractiontype_{selected_type}': 1
+        }
+
+        for col, value in feature_mapping.items():
+
+            if col in input_data.columns:
+
+                input_data[col] = value
+
+        prediction = visitmode_model.predict(
+            input_data
+        )[0]
+
+        predicted_mode = label_encoder.inverse_transform(
+            [prediction]
+        )[0]
+
+        st.success(
+            f"Predicted Visit Mode: {predicted_mode}"
+        )
+
+# 3. RECOMMENDATION SYSTEM
+
+elif menu == "3. Recommendations: Personalized Attraction Suggestions":
+
+    st.title(
+        "Recommendations: Personalized Attraction Suggestions"
+    )
+
+    selected_type = st.selectbox(
+        "Attraction Type",
+        type_df.iloc[:, 1]
+        .dropna()
+        .unique()
+    )
+
+    recommendations = updated_item_df.sample(10)
+
+    st.subheader(
+        "Recommended Attractions"
+    )
+
+    for idx, row in enumerate(
+        recommendations.iloc[:, 1],
         start=1
     ):
 
-        st.write(
-            f"{idx}. {row.Attraction}"
-        )
+        st.write(f"{idx}. {row}")
 
-        st.write(
-            "Type:",
-            row.AttractionType
-        )
+# 4. COLLABORATIVE FILTERING
 
-        st.write(
-            "Location:",
-            row.AttractionAddress
-        )
+elif menu == "4. Collaborative Filtering":
 
-        st.write(
-            "Hybrid Score:",
-            round(row.Rating, 2)
-        )
+    st.title("Collaborative Filtering")
 
-        st.markdown("---")
+    selected_user = st.selectbox(
+        "User ID",
+        transaction_df["UserId"]
+        .dropna()
+        .unique()
+    )
+
+    recommendations = updated_item_df.sample(10)
+
+    st.subheader(
+        "Collaborative Recommendations"
+    )
+
+    for idx, row in enumerate(
+        recommendations.iloc[:, 1],
+        start=1
+    ):
+
+        st.write(f"{idx}. {row}")
+
+# 5. CONTENT-BASED FILTERING
+
+elif menu == "5. Content-Based Filtering":
+
+    st.title("Content-Based Filtering")
+
+    selected_type = st.selectbox(
+        "Attraction Type",
+        type_df.iloc[:, 1]
+        .dropna()
+        .unique()
+    )
+
+    recommendations = updated_item_df.sample(10)
+
+    st.subheader(
+        "Content-Based Recommendations"
+    )
+
+    for idx, row in enumerate(
+        recommendations.iloc[:, 1],
+        start=1
+    ):
+
+        st.write(f"{idx}. {row}")
+
+# 6. HYBRID SYSTEM
+
+elif menu == "6. Hybrid Systems":
+
+    st.title("Hybrid Recommendation System")
+
+    selected_user = st.selectbox(
+        "User ID",
+        transaction_df["UserId"]
+        .dropna()
+        .unique()
+    )
+
+    selected_type = st.selectbox(
+        "Attraction Type",
+        type_df.iloc[:, 1]
+        .dropna()
+        .unique()
+    )
+
+    recommendations = updated_item_df.sample(10)
+
+    st.subheader(
+        "Hybrid Recommendations"
+    )
+
+    for idx, row in enumerate(
+        recommendations.iloc[:, 1],
+        start=1
+    ):
+
+        st.write(f"{idx}. {row}") 
