@@ -27,18 +27,37 @@ DATA_PATH = "DATA SET"
 # LOAD DATASETS
 # =====================================================
 
-from pathlib import Path
+region_df = pd.read_excel(
+    fr"{DATA_PATH}\Region.xlsx"
+)
 
-DATA_PATH = Path("DATA SET")
+continent_df = pd.read_excel(
+    fr"{DATA_PATH}\Continent.xlsx"
+)
 
-region_df = pd.read_excel(DATA_PATH / "Region.xlsx")
-continent_df = pd.read_excel(DATA_PATH / "Continent.xlsx")
-country_df = pd.read_excel(DATA_PATH / "Country.xlsx")
-city_df = pd.read_excel(DATA_PATH / "City.xlsx")
-mode_df = pd.read_excel(DATA_PATH / "Mode.xlsx")
-type_df = pd.read_excel(DATA_PATH / "Type.xlsx")
-transaction_df = pd.read_excel(DATA_PATH / "Transaction.xlsx")
-updated_item_df = pd.read_excel(DATA_PATH / "Updated_Item.xlsx")
+country_df = pd.read_excel(
+    fr"{DATA_PATH}\Country.xlsx"
+)
+
+city_df = pd.read_excel(
+    fr"{DATA_PATH}\City.xlsx"
+)
+
+mode_df = pd.read_excel(
+    fr"{DATA_PATH}\Mode.xlsx"
+)
+
+type_df = pd.read_excel(
+    fr"{DATA_PATH}\Type.xlsx"
+)
+
+transaction_df = pd.read_excel(
+    fr"{DATA_PATH}\Transaction.xlsx"
+)
+
+updated_item_df = pd.read_excel(
+    fr"{DATA_PATH}\Updated_Item.xlsx"
+)
 
 # =====================================================
 # LOAD MODEL
